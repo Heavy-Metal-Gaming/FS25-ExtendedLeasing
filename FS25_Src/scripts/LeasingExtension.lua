@@ -1,15 +1,15 @@
 --
--- ExtendedLeasing.lua
+-- LeasingExtension.lua
 -- Main mod entry for the Extended Leasing mod.
 --
 
-ExtendedLeasing = {}
-ExtendedLeasing.modName = g_currentModName or "ExtendedLeasing"
-ExtendedLeasing.modDir = g_currentModDirectory or ""
-ExtendedLeasing.isLoaded = false
-ExtendedLeasing.settingsInjected = false
+LeasingExtension = {}
+LeasingExtension.modName = g_currentModName or "LeasingExtension"
+LeasingExtension.modDir = g_currentModDirectory or ""
+LeasingExtension.isLoaded = false
+LeasingExtension.settingsInjected = false
 
-ExtendedLeasing.defaults = {
+LeasingExtension.defaults = {
     maxLeaseValueMode = "valueBased",
     maxLeaseValueScope = "perItem",
     maxLeaseValuePercent = 10,
@@ -18,12 +18,12 @@ ExtendedLeasing.defaults = {
     debugLogging = true,
 }
 
-ExtendedLeasing.settings = {}
-for key, value in pairs(ExtendedLeasing.defaults) do
-    ExtendedLeasing.settings[key] = value
+LeasingExtension.settings = {}
+for key, value in pairs(LeasingExtension.defaults) do
+    LeasingExtension.settings[key] = value
 end
 
-ExtendedLeasing.menuItems = {
+LeasingExtension.menuItems = {
     "maxLeaseValueMode",
     "maxLeaseValueScope",
     "maxLeaseValuePercent",
@@ -31,107 +31,107 @@ ExtendedLeasing.menuItems = {
     "maxLeasedItems",
 }
 
-ExtendedLeasing.SETTINGS = {}
-ExtendedLeasing.CONTROLS = {}
+LeasingExtension.SETTINGS = {}
+LeasingExtension.CONTROLS = {}
 
-function ExtendedLeasing:log(message, ...)
+function LeasingExtension:log(message, ...)
     if not self.settings.debugLogging then
         return
     end
 
     if message ~= nil then
         if ... then
-            Logging.info("ExtendedLeasing: " .. string.format(message, ...))
+            Logging.info("LeasingExtension: " .. string.format(message, ...))
         else
-            Logging.info("ExtendedLeasing: " .. tostring(message))
+            Logging.info("LeasingExtension: " .. tostring(message))
         end
     end
 end
 
-function ExtendedLeasing:getSettingsFilePath()
-    return Utils.getFilename("modSettings/ExtendedLeasing.xml", getUserProfileAppPath())
+function LeasingExtension:getSettingsFilePath()
+    return Utils.getFilename("modSettings/LeasingExtension.xml", getUserProfileAppPath())
 end
 
-function ExtendedLeasing:initSettingsDefs()
-    ExtendedLeasing.SETTINGS.maxLeaseValueMode = {
+function LeasingExtension:initSettingsDefs()
+    LeasingExtension.SETTINGS.maxLeaseValueMode = {
         default = 1,
         values = {"valueBased", "static"},
         strings = {
-            g_i18n:getText("extendedLeasing_mode_valueBased"),
-            g_i18n:getText("extendedLeasing_mode_static"),
+            g_i18n:getText("LeasingExtension_mode_valueBased"),
+            g_i18n:getText("LeasingExtension_mode_static"),
         },
     }
 
-    ExtendedLeasing.SETTINGS.maxLeaseValueScope = {
+    LeasingExtension.SETTINGS.maxLeaseValueScope = {
         default = 1,
         values = {"perItem", "total"},
         strings = {
-            g_i18n:getText("extendedLeasing_scope_perItem"),
-            g_i18n:getText("extendedLeasing_scope_total"),
+            g_i18n:getText("LeasingExtension_scope_perItem"),
+            g_i18n:getText("LeasingExtension_scope_total"),
         },
     }
 
-    ExtendedLeasing.SETTINGS.maxLeaseValuePercent = {
+    LeasingExtension.SETTINGS.maxLeaseValuePercent = {
         default = 10,
         values = {},
         strings = {},
     }
     for i = 1, 300 do
-        table.insert(ExtendedLeasing.SETTINGS.maxLeaseValuePercent.values, i)
-        table.insert(ExtendedLeasing.SETTINGS.maxLeaseValuePercent.strings, tostring(i) .. "%")
+        table.insert(LeasingExtension.SETTINGS.maxLeaseValuePercent.values, i)
+        table.insert(LeasingExtension.SETTINGS.maxLeaseValuePercent.strings, tostring(i) .. "%")
     end
 
-    ExtendedLeasing.SETTINGS.maxLeaseStaticValue = {
+    LeasingExtension.SETTINGS.maxLeaseStaticValue = {
         default = 250000,
         min = 0,
         max = 1000000000,
         step = 1000,
     }
 
-    ExtendedLeasing.SETTINGS.maxLeasedItems = {
+    LeasingExtension.SETTINGS.maxLeasedItems = {
         default = 1,
         values = {},
         strings = {},
     }
-    table.insert(ExtendedLeasing.SETTINGS.maxLeasedItems.values, 0)
-    table.insert(ExtendedLeasing.SETTINGS.maxLeasedItems.strings, g_i18n:getText("extendedLeasing_infinite"))
+    table.insert(LeasingExtension.SETTINGS.maxLeasedItems.values, 0)
+    table.insert(LeasingExtension.SETTINGS.maxLeasedItems.strings, g_i18n:getText("LeasingExtension_infinite"))
     for i = 1, 100 do
-        table.insert(ExtendedLeasing.SETTINGS.maxLeasedItems.values, i)
-        table.insert(ExtendedLeasing.SETTINGS.maxLeasedItems.strings, tostring(i))
+        table.insert(LeasingExtension.SETTINGS.maxLeasedItems.values, i)
+        table.insert(LeasingExtension.SETTINGS.maxLeasedItems.strings, tostring(i))
     end
 end
 
-function ExtendedLeasing.getSettingValue(id)
+function LeasingExtension.getSettingValue(id)
     if id == "maxLeaseValueMode" then
-        return ExtendedLeasing.settings.maxLeaseValueMode
+        return LeasingExtension.settings.maxLeaseValueMode
     elseif id == "maxLeaseValueScope" then
-        return ExtendedLeasing.settings.maxLeaseValueScope
+        return LeasingExtension.settings.maxLeaseValueScope
     elseif id == "maxLeaseValuePercent" then
-        return ExtendedLeasing.settings.maxLeaseValuePercent
+        return LeasingExtension.settings.maxLeaseValuePercent
     elseif id == "maxLeaseStaticValue" then
-        return ExtendedLeasing.settings.maxLeaseStaticValue
+        return LeasingExtension.settings.maxLeaseStaticValue
     elseif id == "maxLeasedItems" then
-        return ExtendedLeasing.settings.maxLeasedItems
+        return LeasingExtension.settings.maxLeasedItems
     end
 end
 
-function ExtendedLeasing.setSettingValue(id, value)
+function LeasingExtension.setSettingValue(id, value)
     if id == "maxLeaseValueMode" then
-        ExtendedLeasing.settings.maxLeaseValueMode = value
+        LeasingExtension.settings.maxLeaseValueMode = value
     elseif id == "maxLeaseValueScope" then
-        ExtendedLeasing.settings.maxLeaseValueScope = value
+        LeasingExtension.settings.maxLeaseValueScope = value
     elseif id == "maxLeaseValuePercent" then
-        ExtendedLeasing.settings.maxLeaseValuePercent = value
+        LeasingExtension.settings.maxLeaseValuePercent = value
     elseif id == "maxLeaseStaticValue" then
-        ExtendedLeasing.settings.maxLeaseStaticValue = value
+        LeasingExtension.settings.maxLeaseStaticValue = value
     elseif id == "maxLeasedItems" then
-        ExtendedLeasing.settings.maxLeasedItems = value
+        LeasingExtension.settings.maxLeasedItems = value
     end
 end
 
-function ExtendedLeasing.getStateIndex(id)
-    local currentValue = ExtendedLeasing.getSettingValue(id)
-    local def = ExtendedLeasing.SETTINGS[id]
+function LeasingExtension.getStateIndex(id)
+    local currentValue = LeasingExtension.getSettingValue(id)
+    local def = LeasingExtension.SETTINGS[id]
     if def == nil then
         return 1
     end
@@ -153,12 +153,12 @@ function ExtendedLeasing.getStateIndex(id)
     return def.default or 1
 end
 
-function ExtendedLeasing:saveSettings()
+function LeasingExtension:saveSettings()
     local filePath = self.getSettingsFilePath()
-    local key = "ExtendedLeasing"
+    local key = "LeasingExtension"
     local xmlFile = createXMLFile("settings", filePath, key)
     if xmlFile == nil or xmlFile == 0 then
-        Logging.warning("ExtendedLeasing: Could not create settings file '%s'", filePath)
+        Logging.warning("LeasingExtension: Could not create settings file '%s'", filePath)
         return
     end
 
@@ -171,19 +171,19 @@ function ExtendedLeasing:saveSettings()
     delete(xmlFile)
 end
 
-function ExtendedLeasing:loadSettings()
+function LeasingExtension:loadSettings()
     local filePath = self.getSettingsFilePath()
     if not fileExists(filePath) then
         self:saveSettings()
         return
     end
 
-    local xmlFile = loadXMLFile("ExtendedLeasingSettings", filePath)
+    local xmlFile = loadXMLFile("LeasingExtensionSettings", filePath)
     if xmlFile == nil or xmlFile == 0 then
         return
     end
 
-    local key = "ExtendedLeasing"
+    local key = "LeasingExtension"
 
     if hasXMLProperty(xmlFile, key .. ".maxLeaseValueMode#value") then
         self.settings.maxLeaseValueMode = getXMLString(xmlFile, key .. ".maxLeaseValueMode#value") or self.defaults.maxLeaseValueMode
@@ -204,7 +204,7 @@ function ExtendedLeasing:loadSettings()
     delete(xmlFile)
 end
 
-function ExtendedLeasing:getMaxPurchasePriceLimit(farm)
+function LeasingExtension:getMaxPurchasePriceLimit(farm)
     if self.settings.maxLeaseValueMode == "static" then
         local staticValue = tonumber(self.settings.maxLeaseStaticValue) or self.defaults.maxLeaseStaticValue
         if staticValue <= 0 then
@@ -228,7 +228,7 @@ function ExtendedLeasing:getMaxPurchasePriceLimit(farm)
     return farmValue * pct
 end
 
-function ExtendedLeasing:getMaxLeasedItemsLimit()
+function LeasingExtension:getMaxLeasedItemsLimit()
     local value = tonumber(self.settings.maxLeasedItems) or 0
     if value < 0 then
         return 0
@@ -236,7 +236,7 @@ function ExtendedLeasing:getMaxLeasedItemsLimit()
     return value
 end
 
-function ExtendedLeasing:getPurchasePriceValue(leaseData)
+function LeasingExtension:getPurchasePriceValue(leaseData)
     if leaseData == nil then
         return nil
     end
@@ -260,7 +260,7 @@ function ExtendedLeasing:getPurchasePriceValue(leaseData)
     return nil
 end
 
-function ExtendedLeasing:getFarmLeasedPurchaseTotal(farm)
+function LeasingExtension:getFarmLeasedPurchaseTotal(farm)
     if farm == nil then
         return 0
     end
@@ -289,7 +289,7 @@ function ExtendedLeasing:getFarmLeasedPurchaseTotal(farm)
     return total
 end
 
-function ExtendedLeasing:applyLeaseLimit(leaseData, farm)
+function LeasingExtension:applyLeaseLimit(leaseData, farm)
     if leaseData == nil then
         return leaseData
     end
@@ -362,7 +362,7 @@ function ExtendedLeasing:applyLeaseLimit(leaseData, farm)
     return leaseData
 end
 
-function ExtendedLeasing:installLeaseHooks()
+function LeasingExtension:installLeaseHooks()
     -- Hook BuyVehicleData:updatePrice() to intercept and apply lease caps
     -- This is called whenever a lease price needs to be calculated
     if BuyVehicleData ~= nil and type(BuyVehicleData.updatePrice) == "function" then
@@ -413,26 +413,26 @@ function LeasingExtension:applyLeasePriceCap(leasePrice, farm)
     return nil  -- No adjustment needed
 end
 
-ExtendedLeasingMenuCallbacks = {}
-ExtendedLeasingMenuCallbacks.name = ""
+LeasingExtensionMenuCallbacks = {}
+LeasingExtensionMenuCallbacks.name = ""
 
-function ExtendedLeasingMenuCallbacks.onMenuOptionChanged(self, state, menuOption)
+function LeasingExtensionMenuCallbacks.onMenuOptionChanged(self, state, menuOption)
     local id = menuOption.id
-    local def = ExtendedLeasing.SETTINGS[id]
+    local def = LeasingExtension.SETTINGS[id]
     if def == nil then
         return
     end
 
     local value = def.values[state]
     if value ~= nil then
-        ExtendedLeasing.setSettingValue(id, value)
+        LeasingExtension.setSettingValue(id, value)
     end
 
-    ExtendedLeasing:saveSettings()
-    ExtendedLeasing:updateMenuState()
+    LeasingExtension:saveSettings()
+    LeasingExtension:updateMenuState()
 end
 
-function ExtendedLeasingMenuCallbacks.onNumericValueChanged(self, inputElement)
+function LeasingExtensionMenuCallbacks.onNumericValueChanged(self, inputElement)
     if inputElement == nil then
         return
     end
@@ -447,9 +447,9 @@ function ExtendedLeasingMenuCallbacks.onNumericValueChanged(self, inputElement)
         return
     end
 
-    ExtendedLeasing.setSettingValue(id, value)
-    ExtendedLeasing:saveSettings()
-    ExtendedLeasing:updateMenuState()
+    LeasingExtension.setSettingValue(id, value)
+    LeasingExtension:saveSettings()
+    LeasingExtension:updateMenuState()
 end
 
 local function updateFocusIds(element)
@@ -462,7 +462,7 @@ local function updateFocusIds(element)
     end
 end
 
-function ExtendedLeasing:updateMenuState()
+function LeasingExtension:updateMenuState()
     local valueMode = self.settings.maxLeaseValueMode
     local modeIsValueBased = valueMode == "valueBased"
 
@@ -489,7 +489,7 @@ function ExtendedLeasing:updateMenuState()
     end
 end
 
-function ExtendedLeasing:installLeaseButtonHooks()
+function LeasingExtension:installLeaseButtonHooks()
     -- Attempt to hook into lease button handlers if they exist at runtime
     local targetNames = {"VehicleShopDialog", "VehicleMenu", "LeasingMenu"}
 
@@ -498,7 +498,7 @@ function ExtendedLeasing:installLeaseButtonHooks()
         if type(target) == "table" then
             local methodNames = {"onClickLease", "onLeaseClicked", "onLeaseButtonClicked"}
             for _, methodName in ipairs(methodNames) do
-                if type(target[methodName]) == "function" and not target[methodName].extendedLeasingWrapped then
+                if type(target[methodName]) == "function" and not target[methodName].LeasingExtensionWrapped then
                     local original = target[methodName]
                     target[methodName] = function(selfArg, ...)
                         if type(selfArg.showLeasingMenu) == "function" then
@@ -508,36 +508,36 @@ function ExtendedLeasing:installLeaseButtonHooks()
                         end
                         return original(selfArg, ...)
                     end
-                    target[methodName].extendedLeasingWrapped = true
-                    ExtendedLeasing:log("Lease button hook installed for %s.%s", name, methodName)
+                    target[methodName].LeasingExtensionWrapped = true
+                    LeasingExtension:log("Lease button hook installed for %s.%s", name, methodName)
                 end
             end
         end
     end
 end
 
-function ExtendedLeasing.injectMenu()
+function LeasingExtension.injectMenu()
     if self.settingsInjected then
         return
     end
 
     local inGameMenu = g_gui.screenControllers[InGameMenu]
     if inGameMenu == nil then
-        Logging.warning("ExtendedLeasing: Could not find InGameMenu controller")
+        Logging.warning("LeasingExtension: Could not find InGameMenu controller")
         return
     end
 
     local settingsPage = inGameMenu.pageSettings
     if settingsPage == nil then
-        Logging.warning("ExtendedLeasing: Could not find settings page")
+        Logging.warning("LeasingExtension: Could not find settings page")
         return
     end
 
-    ExtendedLeasingMenuCallbacks.name = settingsPage.name
+    LeasingExtensionMenuCallbacks.name = settingsPage.name
 
     local function addBinaryMenuOption(id)
         local callback = "onMenuOptionChanged"
-        local options = ExtendedLeasing.SETTINGS[id].strings
+        local options = LeasingExtension.SETTINGS[id].strings
 
         local originalBox = settingsPage.checkWoodHarvesterAutoCutBox
         if originalBox == nil then
@@ -560,19 +560,19 @@ function ExtendedLeasing.injectMenu()
 
         local menuBinaryOption = menuOptionBox.elements[1]
         menuBinaryOption.id = id
-        menuBinaryOption.target = ExtendedLeasingMenuCallbacks
+        menuBinaryOption.target = LeasingExtensionMenuCallbacks
         menuBinaryOption:setCallback("onClickCallback", callback)
         menuBinaryOption:setDisabled(false)
 
         local label = menuOptionBox.elements[2]
         if label ~= nil and label.setText ~= nil then
-            label:setText(g_i18n:getText("extendedLeasing_setting_" .. id))
+            label:setText(g_i18n:getText("LeasingExtension_setting_" .. id))
         end
 
         menuBinaryOption:setTexts({unpack(options)})
-        menuBinaryOption:setState(ExtendedLeasing.getStateIndex(id))
+        menuBinaryOption:setState(LeasingExtension.getStateIndex(id))
 
-        ExtendedLeasing.CONTROLS[id] = menuBinaryOption
+        LeasingExtension.CONTROLS[id] = menuBinaryOption
         updateFocusIds(menuOptionBox)
         table.insert(settingsPage.controlsList, menuOptionBox)
         return menuOptionBox
@@ -580,7 +580,7 @@ function ExtendedLeasing.injectMenu()
 
     local function addMultiMenuOption(id)
         local callback = "onMenuOptionChanged"
-        local options = ExtendedLeasing.SETTINGS[id].strings
+        local options = LeasingExtension.SETTINGS[id].strings
 
         local originalBox = settingsPage.multiVolumeVoiceBox
         if originalBox == nil then
@@ -603,19 +603,19 @@ function ExtendedLeasing.injectMenu()
 
         local menuMultiOption = menuOptionBox.elements[1]
         menuMultiOption.id = id
-        menuMultiOption.target = ExtendedLeasingMenuCallbacks
+        menuMultiOption.target = LeasingExtensionMenuCallbacks
         menuMultiOption:setCallback("onClickCallback", callback)
         menuMultiOption:setDisabled(false)
 
         local label = menuOptionBox.elements[2]
         if label ~= nil and label.setText ~= nil then
-            label:setText(g_i18n:getText("extendedLeasing_setting_" .. id))
+            label:setText(g_i18n:getText("LeasingExtension_setting_" .. id))
         end
 
         menuMultiOption:setTexts({unpack(options)})
-        menuMultiOption:setState(ExtendedLeasing.getStateIndex(id))
+        menuMultiOption:setState(LeasingExtension.getStateIndex(id))
 
-        ExtendedLeasing.CONTROLS[id] = menuMultiOption
+        LeasingExtension.CONTROLS[id] = menuMultiOption
         updateFocusIds(menuOptionBox)
         table.insert(settingsPage.controlsList, menuOptionBox)
         return menuOptionBox
@@ -643,20 +643,20 @@ function ExtendedLeasing.injectMenu()
 
         local inputElement = menuOptionBox.elements[1]
         inputElement.id = id
-        inputElement.target = ExtendedLeasingMenuCallbacks
+        inputElement.target = LeasingExtensionMenuCallbacks
         inputElement:setDisabled(false)
 
         if inputElement.setText ~= nil then
-            inputElement:setText(tostring(ExtendedLeasing.getSettingValue(id)))
+            inputElement:setText(tostring(LeasingExtension.getSettingValue(id)))
         elseif inputElement.setValue ~= nil then
-            inputElement:setValue(ExtendedLeasing.getSettingValue(id))
+            inputElement:setValue(LeasingExtension.getSettingValue(id))
         end
 
         if inputElement.setMin ~= nil then
-            inputElement:setMin(ExtendedLeasing.SETTINGS[id].min or 0)
+            inputElement:setMin(LeasingExtension.SETTINGS[id].min or 0)
         end
         if inputElement.setMax ~= nil then
-            inputElement:setMax(ExtendedLeasing.SETTINGS[id].max or 1000000000)
+            inputElement:setMax(LeasingExtension.SETTINGS[id].max or 1000000000)
         end
         if inputElement.setCallback ~= nil then
             inputElement:setCallback("onTextChanged", "onNumericValueChanged")
@@ -665,10 +665,10 @@ function ExtendedLeasing.injectMenu()
 
         local label = menuOptionBox.elements[2]
         if label ~= nil and label.setText ~= nil then
-            label:setText(g_i18n:getText("extendedLeasing_setting_" .. id))
+            label:setText(g_i18n:getText("LeasingExtension_setting_" .. id))
         end
 
-        ExtendedLeasing.CONTROLS[id] = inputElement
+        LeasingExtension.CONTROLS[id] = inputElement
         updateFocusIds(menuOptionBox)
         table.insert(settingsPage.controlsList, menuOptionBox)
         return menuOptionBox
@@ -683,11 +683,11 @@ function ExtendedLeasing.injectMenu()
     end
 
     if sectionTitle then
-        sectionTitle:setText(g_i18n:getText("extendedLeasing_settingsTitle"))
+        sectionTitle:setText(g_i18n:getText("LeasingExtension_settingsTitle"))
     else
         sectionTitle = TextElement.new()
         sectionTitle:applyProfile("fs25_settingsSectionHeader", true)
-        sectionTitle:setText(g_i18n:getText("extendedLeasing_settingsTitle"))
+        sectionTitle:setText(g_i18n:getText("LeasingExtension_settingsTitle"))
         sectionTitle.name = "sectionHeader"
         settingsPage.generalSettingsLayout:addElement(sectionTitle)
     end
@@ -695,8 +695,8 @@ function ExtendedLeasing.injectMenu()
     sectionTitle.focusId = FocusManager:serveAutoFocusId()
     table.insert(settingsPage.controlsList, sectionTitle)
 
-    for _, id in ipairs(ExtendedLeasing.menuItems) do
-        local def = ExtendedLeasing.SETTINGS[id]
+    for _, id in ipairs(LeasingExtension.menuItems) do
+        local def = LeasingExtension.SETTINGS[id]
         if def ~= nil then
             if id == "maxLeaseStaticValue" then
                 addNumericMenuOption(id)
@@ -709,29 +709,29 @@ function ExtendedLeasing.injectMenu()
     end
 
     settingsPage.generalSettingsLayout:invalidateLayout()
-    ExtendedLeasing:updateMenuState()
-    ExtendedLeasing.settingsInjected = true
+    LeasingExtension:updateMenuState()
+    LeasingExtension.settingsInjected = true
 
     InGameMenuSettingsFrame.onFrameOpen = Utils.appendedFunction(InGameMenuSettingsFrame.onFrameOpen, function()
-        ExtendedLeasing:updateMenuState()
+        LeasingExtension:updateMenuState()
     end)
 
     FocusManager.setGui = Utils.appendedFunction(FocusManager.setGui, function(_, gui)
         if gui == "ingameMenuSettings" then
-            for _, control in pairs(ExtendedLeasing.CONTROLS) do
+            for _, control in pairs(LeasingExtension.CONTROLS) do
                 if not control.focusId or not FocusManager.currentFocusData.idToElementMapping[control.focusId] then
                     if not FocusManager:loadElementFromCustomValues(control, nil, nil, false, false) then
-                        Logging.warning("ExtendedLeasing: Could not register control %s with focus manager", control.id or tostring(control.focusId))
+                        Logging.warning("LeasingExtension: Could not register control %s with focus manager", control.id or tostring(control.focusId))
                     end
                 end
             end
         end
     end)
 
-    Logging.info("ExtendedLeasing: Settings injected into Game Settings menu")
+    Logging.info("LeasingExtension: Settings injected into Game Settings menu")
 end
 
-function ExtendedLeasing:loadMap(mission)
+function LeasingExtension:loadMap(mission)
     self.isLoaded = true
     self:initSettingsDefs()
     self:loadSettings()
@@ -739,18 +739,18 @@ function ExtendedLeasing:loadMap(mission)
     self:installLeaseButtonHooks()
     self:injectMenu()
     self:log("loadMap() called")
-    addModEventListener(ExtendedLeasing)
+    addModEventListener(LeasingExtension)
 end
 
-function ExtendedLeasing:deleteMap()
+function LeasingExtension:deleteMap()
     self.isLoaded = false
     self:log("deleteMap() called")
 end
 
-function ExtendedLeasing:update(dt)
+function LeasingExtension:update(dt)
     if not self.isLoaded then
         return
     end
 end
 
-addModEventListener(ExtendedLeasing)
+addModEventListener(LeasingExtension)
