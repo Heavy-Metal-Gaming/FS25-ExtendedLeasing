@@ -1,6 +1,6 @@
 --
 -- LeasingExtension.lua
--- Main mod entry for the Extended Leasing mod.
+-- Main mod entry for the Leasing Extension mod.
 --
 
 LeasingExtension = {}
@@ -57,8 +57,8 @@ function LeasingExtension:initSettingsDefs()
         default = 1,
         values = {"valueBased", "static"},
         strings = {
-            g_i18n:getText("LeasingExtension_mode_valueBased"),
-            g_i18n:getText("LeasingExtension_mode_static"),
+            g_i18n:getText("leasingExtension_mode_valueBased"),
+            g_i18n:getText("leasingExtension_mode_static"),
         },
     }
 
@@ -66,8 +66,8 @@ function LeasingExtension:initSettingsDefs()
         default = 1,
         values = {"perItem", "total"},
         strings = {
-            g_i18n:getText("LeasingExtension_scope_perItem"),
-            g_i18n:getText("LeasingExtension_scope_total"),
+            g_i18n:getText("leasingExtension_scope_perItem"),
+            g_i18n:getText("leasingExtension_scope_total"),
         },
     }
 
@@ -94,7 +94,7 @@ function LeasingExtension:initSettingsDefs()
         strings = {},
     }
     table.insert(LeasingExtension.SETTINGS.maxLeasedItems.values, 0)
-    table.insert(LeasingExtension.SETTINGS.maxLeasedItems.strings, g_i18n:getText("LeasingExtension_infinite"))
+    table.insert(LeasingExtension.SETTINGS.maxLeasedItems.strings, g_i18n:getText("leasingExtension_infinite"))
     for i = 1, 100 do
         table.insert(LeasingExtension.SETTINGS.maxLeasedItems.values, i)
         table.insert(LeasingExtension.SETTINGS.maxLeasedItems.strings, tostring(i))
@@ -566,7 +566,7 @@ function LeasingExtension.injectMenu()
 
         local label = menuOptionBox.elements[2]
         if label ~= nil and label.setText ~= nil then
-            label:setText(g_i18n:getText("LeasingExtension_setting_" .. id))
+            label:setText(g_i18n:getText("leasingExtension_setting_" .. id))
         end
 
         menuBinaryOption:setTexts({unpack(options)})
@@ -609,7 +609,7 @@ function LeasingExtension.injectMenu()
 
         local label = menuOptionBox.elements[2]
         if label ~= nil and label.setText ~= nil then
-            label:setText(g_i18n:getText("LeasingExtension_setting_" .. id))
+            label:setText(g_i18n:getText("leasingExtension_setting_" .. id))
         end
 
         menuMultiOption:setTexts({unpack(options)})
@@ -665,7 +665,7 @@ function LeasingExtension.injectMenu()
 
         local label = menuOptionBox.elements[2]
         if label ~= nil and label.setText ~= nil then
-            label:setText(g_i18n:getText("LeasingExtension_setting_" .. id))
+            label:setText(g_i18n:getText("leasingExtension_setting_" .. id))
         end
 
         LeasingExtension.CONTROLS[id] = inputElement
@@ -683,11 +683,11 @@ function LeasingExtension.injectMenu()
     end
 
     if sectionTitle then
-        sectionTitle:setText(g_i18n:getText("LeasingExtension_settingsTitle"))
+        sectionTitle:setText(g_i18n:getText("leasingExtension_settingsTitle"))
     else
         sectionTitle = TextElement.new()
         sectionTitle:applyProfile("fs25_settingsSectionHeader", true)
-        sectionTitle:setText(g_i18n:getText("LeasingExtension_settingsTitle"))
+        sectionTitle:setText(g_i18n:getText("leasingExtension_settingsTitle"))
         sectionTitle.name = "sectionHeader"
         settingsPage.generalSettingsLayout:addElement(sectionTitle)
     end

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <l10n>
-    <text name="extendedLeasing_title">Erweiterte Leasing</text>
-    <text name="extendedLeasing_desc">Passt die Leasinggrenzen und Vertragsobergrenzen an.</text>
-    <text name="extendedLeasing_settingsTitle">Erweiterte Leasing</text>
-    <text name="extendedLeasing_setting_maxLeaseValueMode">Modus der maximalen Kaufwertung</text>
-    <text name="extendedLeasing_setting_maxLeaseValueScope">Gültigkeit der Obergrenze</text>
-    <text name="extendedLeasing_setting_maxLeaseValuePercent">Kaufwert in Prozent</text>
-    <text name="extendedLeasing_setting_maxLeaseStaticValue">Statischer Maximal-Kaufwert</text>
-    <text name="extendedLeasing_setting_maxLeasedItems">Maximal geliehene Objekte</text>
-    <text name="extendedLeasing_mode_valueBased">Betrag nach Hofwert</text>
-    <text name="extendedLeasing_mode_static">Statischer Wert</text>
-    <text name="extendedLeasing_scope_perItem">Pro Gerät</text>
-    <text name="extendedLeasing_scope_total">Gesamt für alle geleasten Geräte</text>
-    <text name="extendedLeasing_infinite">Unbegrenzt</text>
+    <text name="leasingExtension_title">Leasing Erweiterung</text>
+    <text name="leasingExtension_desc">Passt die Leasinggrenzen und Vertragsobergrenzen an.</text>
+    <text name="leasingExtension_settingsTitle">Leasing Erweiterung</text>
+    <text name="leasingExtension_setting_maxLeaseValueMode">Modus der maximalen Kaufwertung</text>
+    <text name="leasingExtension_setting_maxLeaseValueScope">Gültigkeit der Obergrenze</text>
+    <text name="leasingExtension_setting_maxLeaseValuePercent">Kaufwert in Prozent</text>
+    <text name="leasingExtension_setting_maxLeaseStaticValue">Statischer Maximal-Kaufwert</text>
+    <text name="leasingExtension_setting_maxLeasedItems">Maximal geliehene Objekte</text>
+    <text name="leasingExtension_mode_valueBased">Betrag nach Hofwert</text>
+    <text name="leasingExtension_mode_static">Statischer Wert</text>
+    <text name="leasingExtension_scope_perItem">Pro Gerät</text>
+    <text name="leasingExtension_scope_total">Gesamt für alle geleasten Geräte</text>
+    <text name="leasingExtension_infinite">Unbegrenzt</text>
 </l10n>

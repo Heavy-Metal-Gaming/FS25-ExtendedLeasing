@@ -9,11 +9,11 @@ $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $srcDir = Join-Path $ScriptDir "FS25_Src"
 $outDir = Join-Path $ScriptDir "dist"
-$zipPath = Join-Path $outDir "FS25_ExtendedLeasing.zip"
+$zipPath = Join-Path $outDir "FS25_LeasingExtension.zip"
 
 function New-StagingDir {
     $guid = [System.Guid]::NewGuid().ToString("N")
-    return Join-Path ([System.IO.Path]::GetTempPath()) "ExtendedLeasing-staging-$guid"
+    return Join-Path ([System.IO.Path]::GetTempPath()) "LeasingExtension-staging-$guid"
 }
 
 if (-not (Test-Path $srcDir)) {
