@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<l10n>
+    <text name="extendedLeasing_title">Extended Leasing</text>
+    <text name="extendedLeasing_desc">Adjusts lease limits and contract caps.</text>
+    <text name="extendedLeasing_settingsTitle">Extended Leasing</text>
+    <text name="extendedLeasing_setting_maxLeaseValueMode">Maximum purchase value mode</text>
+    <text name="extendedLeasing_setting_maxLeaseValueScope">Apply cap to</text>
+    <text name="extendedLeasing_setting_maxLeaseValuePercent">Purchase value percentage</text>
+    <text name="extendedLeasing_setting_maxLeaseStaticValue">Static max purchase value</text>
+    <text name="extendedLeasing_setting_maxLeasedItems">Maximum leased items</text>
+    <text name="extendedLeasing_mode_valueBased">Farm value based</text>
+    <text name="extendedLeasing_mode_static">Static value</text>
+    <text name="extendedLeasing_scope_perItem">Per item</text>
+    <text name="extendedLeasing_scope_total">Total for all leased equipment</text>
+    <text name="extendedLeasing_infinite">Infinite</text>
+</l10n>

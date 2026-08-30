@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<modDesc descVersion="107">
+    <title>
+        <en>Extended Leasing</en>
+        <de>Erweiterte Leasing</de>
+    </title>
+    <description>
+        <en><![CDATA[Adjusts lease limits in Farming Simulator 25 with value-based or static caps and a configurable maximum leased item count.]]></en>
+        <de><![CDATA[Passt die Leasinglimits in Farming Simulator 25 mit wertbasierten oder statischen Obergrenzen und einer konfigurierbaren Maximalanzahl an Leasingobjekten an.]]></de>
+    </description>
+    <author>Heavy Metal Gaming</author>
+    <version>1.0.0.0</version>
+
+    <multiplayer supported="true" />
+
+    <extraSourceFiles>
+        <sourceFile filename="scripts/ExtendedLeasing.lua" />
+    </extraSourceFiles>
+
+    <l10n filenamePrefix="l10n/l10n" />
+</modDesc>
