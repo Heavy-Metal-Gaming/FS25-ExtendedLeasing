@@ -363,23 +363,54 @@ function ExtendedLeasing:applyLeaseLimit(leaseData, farm)
 end
 
 function ExtendedLeasing:installLeaseHooks()
-    -- Hook into lease manager if available at runtime
-    if g_leaseManager ~= nil and type(g_leaseManager.getLeaseData) == "function" then
-        local originalGetLeaseData = g_leaseManager.getLeaseData
-        g_leaseManager.getLeaseData = function(selfArg, ...)
-            local leaseData = originalGetLeaseData(selfArg, ...)
-            local farm = nil
-            if selfArg ~= nil and selfArg.farm ~= nil then
-                farm = selfArg.farm
-            elseif g_currentMission ~= nil and g_currentMission.player ~= nil and g_currentMission.player.farm ~= nil then
-                farm = g_currentMission.player.farm
+    -- Hook BuyVehicleData:updatePrice() to intercept and apply lease caps
+    -- This is called whenever a lease price needs to be calculated
+    if BuyVehicleData ~= nil and type(BuyVehicleData.updatePrice) == "function" then
+        local originalUpdatePrice = BuyVehicleData.updatePrice
+        BuyVehicleData.updatePrice = function(self, ...)
+            -- Call original to calculate base price
+            originalUpdatePrice(self, ...)
+            
+            -- Apply lease extension limits if this is a lease
+            if self.leaseVehicle and self.price ~= nil then
+                local farm = g_currentMission ~= nil and g_currentMission.player ~= nil and g_currentMission.player.farm or nil
+                local adjustedPrice = LeasingExtension:applyLeasePriceCap(self.price, farm)
+                if adjustedPrice ~= nil then
+                    self.price = adjustedPrice
+                end
             end
-            return ExtendedLeasing:applyLeaseLimit(leaseData, farm)
         end
-        self:log("Lease hooks installed successfully")
+        self:log("Lease price hook installed successfully on BuyVehicleData:updatePrice()")
     else
-        self:log("Warning: g_leaseManager not available at runtime - lease limits will not be enforced")
+        self:log("Warning: Could not hook BuyVehicleData:updatePrice() - leasing limits will not be enforced")
     end
+end
+
+---Apply lease price cap based on settings
+function LeasingExtension:applyLeasePriceCap(leasePrice, farm)
+    if leasePrice == nil or leasePrice <= 0 then
+        return nil
+    end
+    
+    local maxPurchasePrice = self:getMaxPurchasePriceLimit(farm)
+    if maxPurchasePrice == nil then
+        return nil
+    end
+    
+    if self.settings.maxLeaseValueScope == "total" then
+        local totalLeasedPurchaseValue = self:getFarmLeasedPurchaseTotal(farm)
+        if (totalLeasedPurchaseValue or 0) + leasePrice > maxPurchasePrice then
+            -- Cap the price so total doesn't exceed limit
+            return math.max(0, maxPurchasePrice - (totalLeasedPurchaseValue or 0))
+        end
+    else
+        -- Per-item cap
+        if leasePrice > maxPurchasePrice then
+            return maxPurchasePrice
+        end
+    end
+    
+    return nil  -- No adjustment needed
 end
 
 ExtendedLeasingMenuCallbacks = {}
