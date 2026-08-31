@@ -9,11 +9,12 @@
         <de><![CDATA[Passt die Leasinglimits in Farming Simulator 25 mit wertbasierten oder statischen Obergrenzen und einer konfigurierbaren Maximalanzahl an Leasingobjekten an.]]></de>
     </description>
     <author>Heavy Metal Gaming</author>
-    <version>1.0.0.1-beta.1</version>
+    <version>1.0.0.0</version>
 
     <multiplayer supported="true" />
 
     <extraSourceFiles>
+        <sourceFile filename="scripts/events/LeasingExtensionSettingsEvent.lua" />
         <sourceFile filename="scripts/LeasingExtension.lua" />
     </extraSourceFiles>
 

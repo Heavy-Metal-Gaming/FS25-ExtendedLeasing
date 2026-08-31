@@ -8,6 +8,7 @@ LeasingExtension.modName = g_currentModName or "LeasingExtension"
 LeasingExtension.modDir = g_currentModDirectory or ""
 LeasingExtension.isLoaded = false
 LeasingExtension.settingsInjected = false
+LeasingExtension.suppressNetworkEvent = false
 
 LeasingExtension.defaults = {
     maxLeaseValueMode = "valueBased",
@@ -126,6 +127,84 @@ function LeasingExtension.setSettingValue(id, value)
         LeasingExtension.settings.maxLeaseStaticValue = value
     elseif id == "maxLeasedItems" then
         LeasingExtension.settings.maxLeasedItems = value
+    end
+end
+
+function LeasingExtension:getSettingsSnapshot()
+    return {
+        maxLeaseValueMode = self.settings.maxLeaseValueMode,
+        maxLeaseValueScope = self.settings.maxLeaseValueScope,
+        maxLeaseValuePercent = tonumber(self.settings.maxLeaseValuePercent) or self.defaults.maxLeaseValuePercent,
+        maxLeaseStaticValue = tonumber(self.settings.maxLeaseStaticValue) or self.defaults.maxLeaseStaticValue,
+        maxLeasedItems = tonumber(self.settings.maxLeasedItems) or self.defaults.maxLeasedItems,
+    }
+end
+
+function LeasingExtension:applySettingsSnapshot(snapshot)
+    if snapshot == nil then
+        return
+    end
+
+    if snapshot.maxLeaseValueMode ~= nil then
+        self.settings.maxLeaseValueMode = snapshot.maxLeaseValueMode
+    end
+    if snapshot.maxLeaseValueScope ~= nil then
+        self.settings.maxLeaseValueScope = snapshot.maxLeaseValueScope
+    end
+    if snapshot.maxLeaseValuePercent ~= nil then
+        self.settings.maxLeaseValuePercent = tonumber(snapshot.maxLeaseValuePercent) or self.defaults.maxLeaseValuePercent
+    end
+    if snapshot.maxLeaseStaticValue ~= nil then
+        self.settings.maxLeaseStaticValue = tonumber(snapshot.maxLeaseStaticValue) or self.defaults.maxLeaseStaticValue
+    end
+    if snapshot.maxLeasedItems ~= nil then
+        self.settings.maxLeasedItems = tonumber(snapshot.maxLeasedItems) or self.defaults.maxLeasedItems
+    end
+end
+
+function LeasingExtension:writeSettingsToStream(streamId)
+    local snapshot = self:getSettingsSnapshot()
+    streamWriteString(streamId, snapshot.maxLeaseValueMode)
+    streamWriteString(streamId, snapshot.maxLeaseValueScope)
+    streamWriteInt16(streamId, snapshot.maxLeaseValuePercent)
+    streamWriteInt32(streamId, math.floor(snapshot.maxLeaseStaticValue))
+    streamWriteInt16(streamId, snapshot.maxLeasedItems)
+end
+
+function LeasingExtension:readSettingsFromStream(streamId)
+    local snapshot = {
+        maxLeaseValueMode = streamReadString(streamId),
+        maxLeaseValueScope = streamReadString(streamId),
+        maxLeaseValuePercent = streamReadInt16(streamId),
+        maxLeaseStaticValue = streamReadInt32(streamId),
+        maxLeasedItems = streamReadInt16(streamId),
+    }
+
+    self:applySettingsSnapshot(snapshot)
+end
+
+function LeasingExtension:broadcastSettings(excludeConnection)
+    if g_server ~= nil and LeasingExtensionSettingsEvent ~= nil then
+        g_server:broadcastEvent(LeasingExtensionSettingsEvent.new(), nil, excludeConnection)
+    end
+end
+
+function LeasingExtension:sendSettingsToServer()
+    if g_client ~= nil and g_client:getServerConnection() ~= nil and LeasingExtensionSettingsEvent ~= nil then
+        g_client:getServerConnection():sendEvent(LeasingExtensionSettingsEvent.new())
+    end
+end
+
+function LeasingExtension:onSettingChanged()
+    if self.suppressNetworkEvent then
+        return
+    end
+
+    if g_server ~= nil then
+        self:saveSettings()
+        self:broadcastSettings(nil)
+    else
+        self:sendSettingsToServer()
     end
 end
 
@@ -428,7 +507,7 @@ function LeasingExtensionMenuCallbacks.onMenuOptionChanged(self, state, menuOpti
         LeasingExtension.setSettingValue(id, value)
     end
 
-    LeasingExtension:saveSettings()
+    LeasingExtension:onSettingChanged()
     LeasingExtension:updateMenuState()
 end
 
@@ -448,7 +527,7 @@ function LeasingExtensionMenuCallbacks.onNumericValueChanged(self, inputElement)
     end
 
     LeasingExtension.setSettingValue(id, value)
-    LeasingExtension:saveSettings()
+    LeasingExtension:onSettingChanged()
     LeasingExtension:updateMenuState()
 end
 
@@ -465,21 +544,22 @@ end
 function LeasingExtension:updateMenuState()
     local valueMode = self.settings.maxLeaseValueMode
     local modeIsValueBased = valueMode == "valueBased"
+    local isServer = g_server ~= nil
 
     for _, id in ipairs(self.menuItems) do
         local control = self.CONTROLS[id]
         if control ~= nil then
             if id == "maxLeaseValuePercent" then
-                control:setDisabled(not modeIsValueBased)
+                control:setDisabled((not modeIsValueBased) or (not isServer))
             elseif id == "maxLeaseStaticValue" then
-                control:setDisabled(modeIsValueBased)
+                control:setDisabled(modeIsValueBased or (not isServer))
                 if control.setText ~= nil then
                     control:setText(tostring(self.settings.maxLeaseStaticValue))
                 elseif control.setValue ~= nil then
                     control:setValue(self.settings.maxLeaseStaticValue)
                 end
             else
-                control:setDisabled(false)
+                control:setDisabled(not isServer)
             end
 
             if control.setState ~= nil then
@@ -516,7 +596,7 @@ function LeasingExtension:installLeaseButtonHooks()
     end
 end
 
-function LeasingExtension.injectMenu()
+function LeasingExtension:injectMenu()
     if self.settingsInjected then
         return
     end
@@ -734,12 +814,28 @@ end
 function LeasingExtension:loadMap(mission)
     self.isLoaded = true
     self:initSettingsDefs()
-    self:loadSettings()
+
+    if g_server ~= nil then
+        self:loadSettings()
+    end
+
     self:installLeaseHooks()
     self:installLeaseButtonHooks()
-    self:injectMenu()
+    if g_dedicatedServer == nil then
+        self:injectMenu()
+    end
+
+    if g_server ~= nil then
+        self:broadcastSettings(nil)
+    end
+
     self:log("loadMap() called")
-    addModEventListener(LeasingExtension)
+end
+
+function LeasingExtension:onConnectionFinishedLoading(connection)
+    if g_server ~= nil and connection ~= nil and LeasingExtensionSettingsEvent ~= nil then
+        connection:sendEvent(LeasingExtensionSettingsEvent.new())
+    end
 end
 
 function LeasingExtension:deleteMap()
