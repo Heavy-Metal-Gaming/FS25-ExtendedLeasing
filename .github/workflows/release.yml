@@ -19,9 +19,9 @@ jobs:
       fs_versions: ${{ steps.meta.outputs.fs_versions }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: Parse tag metadata
+      - name: Compute metadata
         id: meta
         run: |
           TAG_REF="${GITHUB_REF#refs/tags/}"
@@ -43,7 +43,7 @@ jobs:
           FS_VERSIONS=$(jq -c '.versions' fs_versions.json)
           echo "fs_versions=${FS_VERSIONS}" >> "$GITHUB_OUTPUT"
 
-  build:
+  build-and-release:
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
@@ -51,60 +51,73 @@ jobs:
         fs_version: ${{ fromJson(needs.prepare.outputs.fs_versions) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: Install zip
-        run: sudo apt-get update && sudo apt-get install -y zip
-
-      # Option A: pin to a specific version of the build scripts
-      - name: Download build scripts (pinned v1.2.0)
-        run: |
-          BASE="https://github.com/Heavy-Metal-Gaming/FS_Mod_Build_Scripts/releases/download/release%2Fv1.2.0"
-          curl -fLo build.sh "${BASE}/build.sh"
-          chmod +x build.sh
-
-      # Option B: always use the latest release of the build scripts
-      # - name: Download build scripts (latest)
-      #   run: |
-      #     BUILD_SH_URL=$(curl -s https://api.github.com/repos/Heavy-Metal-Gaming/FS_Mod_Build_Scripts/releases/latest \
-      #       | jq -r '.assets[] | select(.name == "build.sh") | .browser_download_url')
-      #     curl -fLo build.sh "$BUILD_SH_URL"
-      #     chmod +x build.sh
-
-      - name: Resolve mod name
+      - name: Compute mod name
         id: mod
         run: |
           MOD_NAME=$(grep -oP '(?<=<title>)[^<]*(?=</title>)' \
             FS${{ matrix.fs_version }}_Src/modDesc.xml | head -1 | sed 's/[^a-zA-Z0-9_]//g')
           echo "mod_name=FS${{ matrix.fs_version }}_${MOD_NAME}" >> "$GITHUB_OUTPUT"
 
+      - name: Install zip
+        run: sudo apt-get update && sudo apt-get install -y zip
+
+      - name: Download build scripts
+        run: |
+          BUILD_SH_URL=$(curl -s https://api.github.com/repos/Heavy-Metal-Gaming/FS_Mod_Build_Scripts/releases/latest \
+            | jq -r '.assets[] | select(.name == "build.sh") | .browser_download_url')
+          curl -fLo build.sh "$BUILD_SH_URL"
+          chmod +x build.sh
+
       - name: Build mod artifact
         run: ./build.sh build --mod_path "${{ github.workspace }}" --fs_ver ${{ matrix.fs_version }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.mod.outputs.mod_name }}
           path: dist/${{ steps.mod.outputs.mod_name }}.zip
 
   publish:
-    needs: [prepare, build]
+    needs: [prepare, build-and-release]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
 
       - name: Collect zip files
-        run: find artifacts -name '*.zip' -exec cp {} . \;
+        id: collect
+        run: |
+          find artifacts -name '*.zip' -exec cp {} . \;
+          ls -la *.zip
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ github.ref }}
-          name: "v${{ needs.prepare.outputs.version }}"
+          tag_name: release/${{ needs.prepare.outputs.version }}
+          name: "Leasing Extension v${{ needs.prepare.outputs.version }}"
           prerelease: ${{ needs.prepare.outputs.prerelease }}
           draft: ${{ needs.prepare.outputs.draft }}
-          generate_release_notes: true
+          generate_release_notes: false
+          body: |
+            ## Leasing Extension v${{ needs.prepare.outputs.version }}
+
+            Purchase-price-based lease caps with configurable static or farm-value-percentage limits.
+
+            ### Features
+            - Per-item or total lease value cap
+            - Static or farm-value-percentage mode
+            - Configurable maximum leased item count
+            - Server-authoritative multiplayer settings sync
+            - English and German translations
+
+            ### Installation
+            1. Download the `FS25_LeasingExtension.zip` file below
+            2. Place the zip (do **not** extract) into your FS25 mods folder
+            3. Enable the mod in-game
+
+            See the [README](https://github.com/Heavy-Metal-Gaming/FS25-ExtendedLeasing#readme) for full documentation.
           files: "*.zip"
